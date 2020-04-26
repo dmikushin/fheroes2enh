@@ -332,8 +332,31 @@ add_custom_command(
 add_custom_target(dejavusans_ttf
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dejavusans.ttf)
 
+add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/data/campaign.hs
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/data/heroes2.agg
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/data/standard.hs
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/games/tutorial.gm1
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/maps/brokena.mp2
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data/campaign.hs
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data/heroes2.agg
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data/standard.hs
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/games/tutorial.gm1
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/maps/brokena.mp2
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/data
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/games ${CMAKE_CURRENT_BINARY_DIR}/games
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/maps ${CMAKE_CURRENT_BINARY_DIR}/maps
+	COMMENT "Copying game data")
+
+add_custom_target(${PROJECT_NAME}_data
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/data/campaign.hs
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/data/heroes2.agg
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/data/standard.hs
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/games/tutorial.gm1
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/maps/brokena.mp2) 
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-add_dependencies(${PROJECT_NAME} dejavusans_ttf)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_data dejavusans_ttf)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_RELEASE WITH_AI=simple WITH_IMAGE WITH_MIXER WITH_TTF)
 
