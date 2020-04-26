@@ -3,33 +3,6 @@ project(fheroes2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-ADD_DEFINITIONS(-DBUILD_RELEASE -DWITH_AI=simple -DWITH_IMAGE -DWITH_MIXER -DWITH_TTF)
-
-include_directories(
-        src/engine
-        src/engine/serializer
-        src/fheroes2
-        src/fheroes2/ai
-        src/fheroes2/simple
-        src/fheroes2/army
-        src/fheroes2/agg
-        src/fheroes2/battle
-        src/fheroes2/castle
-        src/fheroes2/dialog
-        src/fheroes2/game
-        src/fheroes2/gui
-        src/fheroes2/heroes
-        src/fheroes2/image
-        src/fheroes2/kingdom
-        src/fheroes2/pocketpc
-        src/fheroes2/maps
-        src/fheroes2/monster
-        src/fheroes2/objects
-        src/fheroes2/resource
-        src/fheroes2/spell
-        src/tools
-        src/fheroes2/system)
-
 set(SOURCE_FILES
         src/engine/audio.cpp
         src/engine/audio.h
@@ -349,44 +322,72 @@ set(SOURCE_FILES
 
 add_subdirectory(src)
 
-add_executable(fheroes2 ${SOURCE_FILES})
+add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dejavusans.ttf
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/fonts/dejavusans.ttf
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/fonts/dejavusans.ttf
+                ${CMAKE_CURRENT_BINARY_DIR}/dejavusans.ttf
+        COMMENT "Copying ${CMAKE_CURRENT_SOURCE_DIR}/fonts/dejavusans.ttf")
 
+add_custom_target(dejavusans_ttf
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dejavusans.ttf)
 
-INCLUDE(FindPkgConfig)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_dependencies(${PROJECT_NAME} dejavusans_ttf)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_RELEASE WITH_AI=simple WITH_IMAGE WITH_MIXER WITH_TTF)
+
+include_directories(
+        src/engine
+        src/engine/serializer
+        src/fheroes2
+        src/fheroes2/ai
+        src/fheroes2/simple
+        src/fheroes2/army
+        src/fheroes2/agg
+        src/fheroes2/battle
+        src/fheroes2/castle
+        src/fheroes2/dialog
+        src/fheroes2/game
+        src/fheroes2/gui
+        src/fheroes2/heroes
+        src/fheroes2/image
+        src/fheroes2/kingdom
+        src/fheroes2/pocketpc
+        src/fheroes2/maps
+        src/fheroes2/monster
+        src/fheroes2/objects
+        src/fheroes2/resource
+        src/fheroes2/spell
+        src/tools
+        src/fheroes2/system)
+
+include(FindPkgConfig)
 
 set(CMAKE_FIND_FRAMEWORK LAST)
 
-#SDL
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
 find_package(SDL_mixer REQUIRED)
 find_package(SDL_ttf REQUIRED)
 find_package(PNG REQUIRED)
 
+pkg_search_module(SDL REQUIRED sdl)
+pkg_search_module(SDLIMAGE REQUIRED SDL_image>=1.2)
+pkg_search_module(SDLMIXER REQUIRED SDL_mixer>=1.2)
+pkg_search_module(SDLTTF REQUIRED SDL_ttf>=1.2)
 
-PKG_SEARCH_MODULE(SDL REQUIRED sdl)
-PKG_SEARCH_MODULE(SDLIMAGE REQUIRED SDL_image>=1.2)
-PKG_SEARCH_MODULE(SDLMIXER REQUIRED SDL_mixer>=1.2)
-PKG_SEARCH_MODULE(SDLTTF REQUIRED SDL_ttf>=1.2)
-
-INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} ${SDLIMAGE_INCLUDE_DIRS})
-
-
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
+if (UNIX AND NOT APPLE)
+set(LINUX TRUE)
 endif()
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${PNG_INCLUDE_DIRS} ${SDL_INCLUDE_DIRS} ${SDLIMAGE_INCLUDE_DIRS})
 
-if(LINUX)
-	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} ${SDLTTF_LIBRARY} ${PNG_LIBRARY})
-else()
-    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} /usr/local/include)
-    link_directories(/usr/local/lib)
-    link_libraries(libpng.a libSDL.a libSDLmain.a libSDL_image.a libSDL_mixer.a)
-
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} ${SDLTTF_LIBRARY} ${PNG_LIBRARY} -Wl,-framework,Cocoa )
+if (LINUX)
+set(EXTRA_LINK_LIBRARIES -Wl,-framework,Cocoa)
 endif()
 
+target_link_libraries(${PROJECT_NAME} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLMIXER_LIBRARY} ${SDLTTF_LIBRARY} ${PNG_LIBRARY} ${EXTRA_LINK_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
 
@@ -394,3 +395,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -ggdb -fno-omit-frame-poi
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto")
 set(CMAKE_LD_FLAGS_RELEASE "${CMAKE_LD_FLAGS_RELEASE} -mtune=native -flto")
+
