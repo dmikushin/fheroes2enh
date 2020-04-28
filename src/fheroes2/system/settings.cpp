@@ -133,7 +133,8 @@ const settings_t settingsGeneral[] =
     {GLOBAL_ALTRESOURCE, "alt resource",},
     {GLOBAL_POCKETPC, "pocketpc",},
     {GLOBAL_POCKETPC, "pocket pc",},
-    {GLOBAL_USESWSURFACE, "use swsurface only",}
+    {GLOBAL_USESWSURFACE, "use swsurface only",},
+    {0, "",},
 };
 
 // internal settings
@@ -212,8 +213,7 @@ const settings_t settingsFHeroes2[] =
     {Settings::GAME_DYNAMIC_INTERFACE, _("game: also use dynamic interface for castles"),},
     {Settings::GAME_HIDE_INTERFACE, _("game: hide interface"),},
     {Settings::GAME_CONTINUE_AFTER_VICTORY, _("game: offer to continue the game afer victory condition"),},
-
-
+    {0, "",},
 };
 
 string Settings::GetVersion()
