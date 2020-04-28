@@ -219,26 +219,26 @@ void System::SetLocale(int category, const char* locale)
 
 std::string System::GetMessageLocale(int length /* 1, 2, 3 */)
 {
-    std::string locname;
 #if defined(WIN32)
-    char* clocale = setlocale(LC_MONETARY, nullptr);
-#elif defined(ANDROID)
-    char* clocale = setlocale(LC_MESSAGES, nullptr);
+    const char* clocale = setlocale(LC_MONETARY, nullptr);
+#elif defined(ANDROID) || defined(__APPLE__)
+    const char* clocale = setlocale(LC_MESSAGES, nullptr);
 #else
-    char *clocale = std::setlocale(LC_MESSAGES, nullptr);
+    const char *clocale = std::setlocale(LC_MESSAGES, nullptr);
 #endif
 
-    if (clocale)
+    if (!clocale) return "";
+
+    if (!strcmp(clocale, "C")) return "";
+
+    std::string locname = StringLower(clocale);
+    // 3: en_us.utf-8
+    // 2: en_us
+    // 1: en
+    if (length < 3)
     {
-        locname = StringLower(clocale);
-        // 3: en_us.utf-8
-        // 2: en_us
-        // 1: en
-        if (length < 3)
-        {
-            auto list = StringSplit(locname, length < 2 ? "_" : ".");
-            return list.empty() ? locname : list.front();
-        }
+        auto list = StringSplit(locname, length < 2 ? "_" : ".");
+        return list.empty() ? locname : list.front();
     }
 
     return locname;
@@ -250,7 +250,6 @@ int System::GetCommandOptions(int argc, const std::vector<std::string>& argv, co
     return -1;
 #else
     return -1;
-
 #endif
 }
 
