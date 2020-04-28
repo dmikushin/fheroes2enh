@@ -355,8 +355,18 @@ add_custom_target(${PROJECT_NAME}_data
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/games/tutorial.gm1
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/maps/brokena.mp2) 
 
+add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fheroes2.cfg
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/fheroes2.cfg
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/fheroes2.cfg
+                ${CMAKE_CURRENT_BINARY_DIR}/fheroes2.cfg
+        COMMENT "Copying ${CMAKE_CURRENT_SOURCE_DIR}/fheroes2.cfg")
+
+add_custom_target(fheroes2_cfg
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/fheroes2.cfg)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_data dejavusans_ttf)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_data fheroes2_cfg dejavusans_ttf)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_RELEASE WITH_AI=simple WITH_IMAGE WITH_MIXER WITH_TTF)
 
